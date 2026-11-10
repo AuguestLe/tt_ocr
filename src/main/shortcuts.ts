@@ -53,6 +53,7 @@ import {
   registerMobileSource
 } from './mobile-sync'
 import type { MobileAnswer } from '../shared/mobile'
+import { hasSpeechKey } from '../shared/transcription'
 
 /**
  * `registered`: the key is held now. `available`: free, but not held, the
@@ -1207,7 +1208,7 @@ let recordingShortcut = false
 function isShortcutLive(action: string): boolean {
   const scope = SHORTCUT_SCOPES[action] ?? { page: 'any' }
   if (recordingShortcut && state.inSettingsPage) return false
-  if (scope.voice && !settings.dashscopeApiKey) return false
+  if (scope.voice && !hasSpeechKey(settings)) return false
   if (!onShortcutPage(scope.page)) return false
   if (isMiniBarOn && action === 'switchMode') return false
   if (scope.hidden || isMainWindowShown() || isMiniBarVisible()) return true
@@ -1333,8 +1334,14 @@ ipcMain.handle('setShortcutRecording', (_event, recording: boolean) => {
 })
 
 onSettingsChanged((previous) => {
-  // The voice actions need the DashScope key
-  if (previous.dashscopeApiKey !== settings.dashscopeApiKey) syncShortcuts()
+  // The voice actions need the key of the chosen speech provider
+  if (
+    previous.dashscopeApiKey !== settings.dashscopeApiKey ||
+    previous.sttProvider !== settings.sttProvider ||
+    previous.tokenPlanSttKey !== settings.tokenPlanSttKey
+  ) {
+    syncShortcuts()
+  }
   // Runs before settings.ts creates the toolbar window, which then opens at its size
   syncToolbarWidth()
 })

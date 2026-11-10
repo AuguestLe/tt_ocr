@@ -36,7 +36,7 @@ test('canceling real CONNECTING sockets safely handles the ws close error', () =
           } },
           ws: Socket
         })('src/main/transcription.ts')
-        const starting = handlers.get('start-transcription')(null, 'test', {
+        const starting = handlers.get('start-transcription')(null, { provider: 'dashscope', apiKey: 'test' }, {
           purpose: 'conversation', sources: ['system', 'microphone']
         }).then(() => { throw new Error('canceled startup unexpectedly succeeded') }, error => error)
         await connected
@@ -116,10 +116,14 @@ test('two independent sessions tag transcripts, route PCM and drain final senten
   const h = harness(),
     sentences = []
   h.api.onConversationSentence((...v) => sentences.push(v))
-  await h.handlers.get('start-transcription')(null, 'test', {
-    purpose: 'conversation',
-    sources: ['system', 'microphone']
-  })
+  await h.handlers.get('start-transcription')(
+    null,
+    { provider: 'dashscope', apiKey: 'test' },
+    {
+      purpose: 'conversation',
+      sources: ['system', 'microphone']
+    }
+  )
   assert.equal(h.sockets.length, 2)
   h.handlers.get('transcription-audio-chunk')(null, new Uint8Array([1, 2]).buffer, 'microphone')
   assert(!h.sockets[0].sent.some(Buffer.isBuffer))
@@ -145,10 +149,14 @@ test('two independent sessions tag transcripts, route PCM and drain final senten
 
 test('new start waits for a draining old session and creates the requested purpose', async () => {
   const h = harness(true)
-  await h.handlers.get('start-transcription')(null, 'test', {
-    purpose: 'conversation',
-    sources: ['system', 'microphone']
-  })
+  await h.handlers.get('start-transcription')(
+    null,
+    { provider: 'dashscope', apiKey: 'test' },
+    {
+      purpose: 'conversation',
+      sources: ['system', 'microphone']
+    }
+  )
   const stopping = h.handlers.get('stop-transcription')()
   const starting = h.handlers.get('start-transcription')(null, 'test', { purpose: 'screenshot' })
   for (const s of h.sockets.slice(0, 2))
@@ -168,10 +176,14 @@ test('ASR failure notifies existing hooks once and closes every source', async (
   h.api.onTranscriptionError((message) => errors.push(message))
   h.api.onTranscriptionStart((purpose) => starts.push(purpose))
   h.api.onTranscriptionEnd(() => ends.push(true))
-  await h.handlers.get('start-transcription')(null, 'test', {
-    purpose: 'conversation',
-    sources: ['system', 'microphone']
-  })
+  await h.handlers.get('start-transcription')(
+    null,
+    { provider: 'dashscope', apiKey: 'test' },
+    {
+      purpose: 'conversation',
+      sources: ['system', 'microphone']
+    }
+  )
   assert.deepEqual(starts, ['conversation'])
   h.sockets[1].emit(
     'message',
@@ -197,10 +209,14 @@ test('failures are worded for the user, naming the source only for its own failu
     const h = harness(),
       errors = []
     h.api.onTranscriptionError((message) => errors.push(message))
-    await h.handlers.get('start-transcription')(null, 'test', {
-      purpose: sources ? 'conversation' : 'screenshot',
-      sources
-    })
+    await h.handlers.get('start-transcription')(
+      null,
+      { provider: 'dashscope', apiKey: 'test' },
+      {
+        purpose: sources ? 'conversation' : 'screenshot',
+        sources
+      }
+    )
     if (data instanceof Error) h.sockets[socket].emit('error', data)
     else h.sockets[socket].emit('message', data)
     return errors
@@ -232,10 +248,14 @@ test('failures are worded for the user, naming the source only for its own failu
 
 test('a stalled finish is bounded by 700ms and concurrent stops share the drain', async (t) => {
   const h = harness(true)
-  await h.handlers.get('start-transcription')(null, 'test', {
-    purpose: 'conversation',
-    sources: ['system', 'microphone']
-  })
+  await h.handlers.get('start-transcription')(
+    null,
+    { provider: 'dashscope', apiKey: 'test' },
+    {
+      purpose: 'conversation',
+      sources: ['system', 'microphone']
+    }
+  )
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const first = h.handlers.get('stop-transcription')()
   const second = h.handlers.get('stop-transcription')()
@@ -256,10 +276,14 @@ test('one source rejecting startup closes the other and preserves the ASR error'
     return this.length
   }
   await assert.rejects(
-    h.handlers.get('start-transcription')(null, 'test', {
-      purpose: 'conversation',
-      sources: ['system', 'microphone']
-    }),
+    h.handlers.get('start-transcription')(
+      null,
+      { provider: 'dashscope', apiKey: 'test' },
+      {
+        purpose: 'conversation',
+        sources: ['system', 'microphone']
+      }
+    ),
     /百炼平台 API Key 无效.*InvalidApiKey/
   )
   assert(h.sockets.every((s) => s.readyState === 3))
@@ -285,7 +309,10 @@ test('the preload drops the prefix Electron puts on a rejected start', async (t)
     },
     '@electron-toolkit/preload': { electronAPI: {} }
   })
-  await assert.rejects(global.window.api.startTranscription('key'), {
-    message: '百炼平台 API Key 无效（HTTP 401）'
-  })
+  await assert.rejects(
+    global.window.api.startTranscription({ provider: 'dashscope', apiKey: 'key' }),
+    {
+      message: '百炼平台 API Key 无效（HTTP 401）'
+    }
+  )
 })

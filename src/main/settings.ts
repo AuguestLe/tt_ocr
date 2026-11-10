@@ -16,6 +16,7 @@ import {
   DEFAULT_EXTERNAL_KNOWLEDGE,
   normalizeExternalKnowledge
 } from '../shared/external-knowledge'
+import type { SpeechProvider } from '../shared/transcription'
 import { setStealthEnabled } from './window-privacy'
 import { sendToMiniBar, setMiniBarOpacity } from './mini-bar-window'
 
@@ -204,6 +205,10 @@ export const settings = {
   /** Copy the code block of a finished answer to the system clipboard */
   codeCopyToClipboard: false,
   dashscopeApiKey: '',
+  /** 语音识别方案: 百炼按量, or a Token Plan Realtime model */
+  sttProvider: 'dashscope' as SpeechProvider,
+  /** Token Plan's Key (sk-sp-…), used when `sttProvider` is 'token-plan' */
+  tokenPlanSttKey: '',
   /** 手机同步 over the LAN: the app serves the phone page itself, see mobile-sync.ts */
   mobileLanEnabled: false,
   /** The LAN page's secret, made by the renderer on first use; a new one voids every QR code */

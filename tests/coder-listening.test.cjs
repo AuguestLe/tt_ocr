@@ -66,6 +66,9 @@ test('screenshot toggle cancels a pending capture without starting recognition a
   const mocks = {
     react: { ...React, useEffect: (f) => effects.push(f), useRef: (v) => ({ current: v }) },
     '@/lib/store/settings': { useSettingsStore: () => ({ dashscopeApiKey: 'test' }) },
+    '@/lib/speech': {
+      resolveSpeechConfig: () => ({ config: { provider: 'dashscope', apiKey: 'test' } })
+    },
     '@/conversation/listening': {
       stopListening() {
         /* unused mock */

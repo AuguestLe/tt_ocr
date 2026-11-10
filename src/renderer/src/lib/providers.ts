@@ -84,7 +84,10 @@ const MODEL_FAMILIES: Partial<Record<ProviderId, string[]>>[] = [
   // GPT-6 tiers from fast to flagship: Luna < Sol < Astra
   { openai: ['gpt-6-luna'], openrouter: ['openai/gpt-6-luna'] },
   { openai: ['gpt-6-sol'], openrouter: ['openai/gpt-6-sol'] },
-  { openai: ['gpt-6-astra'], openrouter: ['openai/gpt-6-astra'] }
+  { openai: ['gpt-6-astra'], openrouter: ['openai/gpt-6-astra'] },
+  // DeepSeek on OpenAI, a family of its own: switching platforms must not turn
+  // it into DeepSeek's or OpenRouter's spelling of the same model
+  { openai: ['deepseek-v4.1-flash'] }
 ]
 
 /**

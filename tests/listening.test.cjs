@@ -30,6 +30,9 @@ for (const phase of ['capture', 'asr']) {
           getState: () => ({ dashscopeApiKey: 'test', conversationAudioMode: 'system' })
         }
       },
+      '@/lib/speech': {
+        resolveSpeechConfig: () => ({ config: { provider: 'dashscope', apiKey: 'test' } })
+      },
       '@/lib/store/transcription': { useTranscriptionStore: { getState: () => state } },
       '@/lib/store/conversation': {
         useConversationStore: { getState: () => ({ setErrorMessage: (e) => errors.push(e) }) }
@@ -86,6 +89,9 @@ test('canceling an in-flight capture cannot stop or mark a newer start as failed
           conversationSilenceMs: 800
         })
       }
+    },
+    '@/lib/speech': {
+      resolveSpeechConfig: () => ({ config: { provider: 'dashscope', apiKey: 'test' } })
     },
     '@/lib/store/transcription': { useTranscriptionStore: { getState: () => state } },
     '@/lib/store/conversation': {

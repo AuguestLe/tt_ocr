@@ -35,6 +35,7 @@ import {
   type ToolbarActionName,
   type ToolbarButtons
 } from '../../../../shared/toolbar'
+import { TOKEN_PLAN_STT_URL, type SpeechProvider } from '../../../../shared/transcription'
 
 export type { Theme }
 export type { ApiProfile }
@@ -320,6 +321,13 @@ interface Settings {
 
   dashscopeApiKey: string
 
+  /** 语音识别方案: 百炼按量 (fun-asr-realtime), or a Token Plan Realtime model */
+  sttProvider: SpeechProvider
+  /** Token Plan's Key (sk-sp-…), used when `sttProvider` is 'token-plan' */
+  tokenPlanSttKey: string
+  /** The Token Plan Realtime endpoint; the model rides in its query */
+  tokenPlanSttURL: string
+
   /** 手机同步 over the LAN: the app serves the phone page itself */
   mobileLanEnabled: boolean
   /** The LAN page's secret, made on first use; a new one voids every QR code */
@@ -469,6 +477,9 @@ const defaultSettings: Settings = {
   codeCopyToClipboard: false,
 
   dashscopeApiKey: '',
+  sttProvider: 'dashscope',
+  tokenPlanSttKey: '',
+  tokenPlanSttURL: TOKEN_PLAN_STT_URL,
 
   mobileLanEnabled: false,
   mobileLanKey: '',

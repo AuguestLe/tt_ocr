@@ -10,6 +10,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { useSettingsStore, type HintMode } from '@/lib/store/settings'
+import { hasSpeechKey } from '@/lib/speech'
 import { KnowledgeField } from '../KnowledgeField'
 import { ModeProfileSelect } from '../ModeProfileSelect'
 import { SceneEditor } from '../SceneEditor'
@@ -35,7 +36,6 @@ export function ConversationSection({
   onOpenKnowledge: () => void
 }) {
   const {
-    dashscopeApiKey,
     conversationHintMode,
     conversationAudioMode,
     conversationMicrophoneDeviceId,
@@ -55,13 +55,14 @@ export function ConversationSection({
       () => setMicrophones([])
     )
   }, [conversationAudioMode])
+  const speechReady = useSettingsStore(hasSpeechKey)
 
   return (
     <>
-      {!dashscopeApiKey && (
+      {!speechReady && (
         <div className="flex items-center gap-2 rounded-lg border border-amber-600/40 bg-amber-100/80 px-4 py-2 text-sm text-amber-900">
           <TriangleAlert className="h-4 w-4 shrink-0" />
-          对话模式靠语音识别听对方说话，需要先填写百炼平台 API Key
+          对话模式靠语音识别听对方说话，需要先在「设置 → 语音」填好识别用的 API Key
           <button
             className="ml-auto text-blue-700 hover:underline cursor-pointer"
             onClick={onOpenVoice}

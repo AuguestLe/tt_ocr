@@ -134,8 +134,8 @@ for (const [established, cancel] of [
       api: new Proxy(
         {
           stopTranscription: () => handlers.get('stop-transcription')(),
-          startTranscription: (key, options) =>
-            handlers.get('start-transcription')(null, key, options),
+          startTranscription: (config, options) =>
+            handlers.get('start-transcription')(null, config, options),
           onTranscriptionStopped: (f) => bus.on('transcription-stopped', f),
           onToggleTranscription: (f) => {
             toggle = f
@@ -151,6 +151,9 @@ for (const [established, cancel] of [
     const listening = load('src/renderer/src/conversation/listening.ts', {
       sonner: { toast: noop },
       '@/lib/store/settings': { useSettingsStore: settingsStore },
+      '@/lib/speech': {
+        resolveSpeechConfig: () => ({ config: { provider: 'dashscope', apiKey: 'test' } })
+      },
       '@/lib/store/transcription': { useTranscriptionStore: transcriptionStore },
       '@/lib/store/conversation': {
         useConversationStore: { getState: () => ({ setErrorMessage: noop }) }
@@ -168,6 +171,9 @@ for (const [established, cancel] of [
       react: hooks,
       sonner: { toast: noop, Toaster: noop },
       '@/lib/store/settings': { useSettingsStore: settingsStore },
+      '@/lib/speech': {
+        resolveSpeechConfig: () => ({ config: { provider: 'dashscope', apiKey: 'test' } })
+      },
       '@/lib/store/transcription': { useTranscriptionStore: transcriptionStore },
       '@/lib/store/solution': { useSolutionStore: () => ({ setErrorMessage: noop }) },
       '@/lib/audio-capture': capture,

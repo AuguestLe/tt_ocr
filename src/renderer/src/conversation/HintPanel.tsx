@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import ShortcutRenderer from '@/components/ShortcutRenderer'
 import { useSettingsStore } from '@/lib/store/settings'
+import { hasSpeechKey } from '@/lib/speech'
 import { useShortcutsStore } from '@/lib/store/shortcuts'
 import { useTranscriptionStore } from '@/lib/store/transcription'
 import { useConversationStore } from '@/lib/store/conversation'
@@ -219,7 +220,7 @@ function HintCardView({ card, ref }: { card: HintCard; ref: (el: HTMLElement | n
 function EmptyState() {
   const navigate = useNavigate()
   const { shortcuts } = useShortcutsStore()
-  const dashscopeApiKey = useSettingsStore((state) => state.dashscopeApiKey)
+  const speechReady = useSettingsStore(hasSpeechKey)
   const hintMode = useSettingsStore((state) => state.conversationHintMode)
   const isTranscribing = useTranscriptionStore((state) => state.isTranscribing)
   const hasUtterances = useConversationStore((state) => state.utterances.length > 0)
@@ -231,10 +232,10 @@ function EmptyState() {
   )
 
   let content: ReactNode
-  if (!dashscopeApiKey) {
+  if (!speechReady) {
     content = (
       <>
-        <p>对话模式靠语音识别听对方说话，需要先填写百炼平台 API Key</p>
+        <p>对话模式靠语音识别听对方说话，需要先在「设置 → 语音」填好识别用的 API Key</p>
         <Button size="sm" variant="secondary" onClick={() => navigate('/settings?tab=voice')}>
           去设置
         </Button>

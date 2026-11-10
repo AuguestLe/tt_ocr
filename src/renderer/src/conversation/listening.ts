@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import { useSettingsStore } from '@/lib/store/settings'
 import { useTranscriptionStore } from '@/lib/store/transcription'
 import { useConversationStore } from '@/lib/store/conversation'
+import { resolveSpeechConfig } from '@/lib/speech'
 import { describeCaptureError, startAudioCapture, stopAudioCapture } from '@/lib/audio-capture'
 
 /**
@@ -17,12 +18,12 @@ export async function startListening(): Promise<void> {
   if (starting) return
   const request = ++operation
   starting = true
-  const { dashscopeApiKey, conversationSilenceMs, conversationAudioMode } =
-    useSettingsStore.getState()
+  const { conversationSilenceMs, conversationAudioMode } = useSettingsStore.getState()
   const { setErrorMessage } = useConversationStore.getState()
-  if (!dashscopeApiKey) {
+  const resolved = resolveSpeechConfig()
+  if (!resolved.config) {
     starting = false
-    setErrorMessage('请先在「设置 → 语音」填写百炼平台 API Key，才能识别对方说话')
+    setErrorMessage(`${resolved.missing}，才能识别对方说话`)
     return
   }
   let phase: 'capture' | 'asr' = 'asr'
@@ -33,7 +34,7 @@ export async function startListening(): Promise<void> {
     const sources = await startAudioCapture({ mode: conversationAudioMode || 'system' })
     if (request !== operation) return
     phase = 'asr'
-    await window.api.startTranscription(dashscopeApiKey, {
+    await window.api.startTranscription(resolved.config, {
       purpose: 'conversation',
       sources,
       maxSentenceSilence: conversationSilenceMs
